@@ -1,52 +1,41 @@
-# STM32F030-CMSIS-I2C-lib
-Basic I2C library for the STM32F030 based on CMSIS (no HAL)
+# STM32F030-CMSIS-I2C-LCD-lib
+A simple library that gives basic ALCD commands to an LCD module driven by an I2C LCD driver module.
 
-# The following routines are supported:
-+ **```void I2C_init( I2C_TypeDef *thisI2C, uint32_t I2CSpeed )```**<br>
-Initialize the specified I2C interface to operate at the specified speed. Note that
-currently *only I2C1* is supported! I2C1 uses the following pins:<br>
-  - SCL: GPIO pin A9,  pin 17
-  - SDA: GPIO pin A10, pin 18<br>
-Possible I2C speeds are from 10 kHz up to 400 kHz. Speeds below 10 kHz will default to
-10 kHz and speeds above 400 kHz will default to 400 kHz.
-+ **```void I2C_start( I2C_TypeDef *thisI2C )```***<br>
-Set the start bit and wait for acknowledge that it was set.
-+ **```void I2C_setAddress( I2C_TypeDef *thisI2C, uint8_t address )```**<br>
-Write the address to the SADD bits of the CR2 register.
-+ **```void I2C_stop( I2C_TypeDef *thisI2C )```**<br>
-Set and then clear the stop bit.
-+ **```void I2C_setNBytes( I2C_TypeDef *thisI2C, uint8_t nBytes )```**<br>
-Set the number of bytes to be written.
-+ **```void I2C_write( I2C_TypeDef *thisI2C, uint8_t data )```**<br>
-Write a byte of data to the I2C interface.
-+ **```void//  I2C_stop( I2C_TypeDef *thisI2C )```**<br>
-Send the I2C stop bit and wait 20 us to allow enough time for next I2C command to occur
-properly.
-+ **```void I2C_setReadMode( I2C_TypeDef *thisI2C )```**<br>
-Set the I2C interface into the read mode.
-+ **```void I2C_setWriteMode( I2C_TypeDef *thisI2C )```**<br>
-Set the I2C interface into the write mode.
-+ **```uint8_t I2C_read( I2C_TypeDef *thisI2C )```**<br>
-Read a byte from the I2C interface.
+## The following routines are supported:
++ **```void  I2C_LCD_init( I2C_TypeDef *thisI2C, uint32_t I2CSpeed )```**<br>
+Initialize the LCD display module and the associated I2C peripheral. Note that the STM32F030F4 only
+supports I2C1. I2CSpeed supports speeds from 10 kHz to approx 400 kHz.<br>
+**Note**: Commands are sent via 4-bit mode even though all 8 IO lines on the LCD are connected. This
+is because the code was ported from the non-I2C code which used 4-bit mode.
 
-## Normal Write Command Flow:
-```
-I2C_init( I2C1, I2CSpeed ); // (Call once in program)
++ **```void  I2C_LCD_cmd( uint8_t data )```**<br>
+Send command (not character) to LCD display. Commands are sent like data but with the RS pin
+set LOW. Will tack on extra delay when given clear or home commands as outlined in the
+datasheet.<br>
+The following command codes are supported:<br>
+```LCD_CLEAR```               : Clear display<br>
+```LCD_HOME```                 : Move to home position<br>
+```LCD_OFF```                  : Turn off LCD<br>
+```LCD_ON_NO_CURSOR```         : Turn on LCD, no cursor<br>
+```LCD_ON_BLINK_CURSOR```      : Turn on LCD, blinking block cursor<br>
+```LCD_ON_LINE_CURSOR```       : Turn on LCD, underline cursor<br>
+```LCD_ON_LINE_BLINK_CURSOR``` : Turn on LCD, blinking underline cursor<br>
+```I2C_LCD_4B```               : 4-bit mode (for initialization)<br>
+```LCD_4B_58F_2L```            : 4-bit, 5x8 character, 2 lines<br>
+```LCD_8B_58F_2L```            : 8-bit, 5x8 character, 2 lines<br>
+```LCD_1ST_LINE```             : Position cursor at beginning of 1st line<br>
+```LCD_2ND_LINE```             : Position cursor at beginning of 2nd line
 
-I2C_setAddress( I2C1, deviceI2CAddress );   // (Set once per device)
-I2C_setNBytes( I2C1, numberOfBytesToTransmit );
-I2C_start( I2C1 );
-I2C_write( I2C1, data );   // (repeat write as required)
-I2C_stop( I2C1 );
-```
++ **```void  I2C_LCD_putc( char data )```**<br>
+Writes a single character to the current position on the LCD display
 
-## Normal Read Command Flow:
-```
-I2C_setAddress( I2C1, deviceI2CAddress );   // (Set once per device)
-I2C_setNBytes( I2C1, numberOfBytesToReceive );
-I2C_setReadMode( I2C1 );
-I2C_start( I2C1 );
-data[0] = I2C_read( I2C1 );   //(repeat read as required)
-I2C_stop( I2C1 );
-I2C_setWriteMode( I2C1 );
-```
++ **```void  I2C_LCD_puts( char *data )```**<br>
+Takes a pointer to a null-terminated string and displays that string from the current LCD 
+cursor position. Does not check for LCD line/string overflow.
+
++ **```void  i100toa( int16_t realV, char *thisString )```**<br>
+i100toa takes a number with 2 decimal places multiplied by 100 and a pointer to a string,
+and returns a string of the original decimal number rounded to 1 decimal place. For example,
+if the number in question is 12.36, then 1236 is passed via realV. The resulting string is 12.4,
+because 12.36 rounds up to 12.4. Negative numbers and more complex rounding work as
+expected. For example, -2.35, passed as -235, returns "-2.4".
