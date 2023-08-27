@@ -1,5 +1,6 @@
 # STM32F030-CMSIS-I2C-LCD-lib
-A simple library that gives basic ALCD commands to an LCD module driven by an I2C LCD driver module.
+A simple library that gives basic initialization and write commands to an LCD connected to a PCF8574-based I2C
+LCD driver module.
 
 ## The following routines are supported:
 + **```void  I2C_LCD_init( I2C_TypeDef *thisI2C, uint32_t I2CSpeed )```**<br>
