@@ -3,6 +3,9 @@
 //  ------------------------------------------------------------------------------------------
 //  A simple library that gives basic LCD commands to an LCD module driven via an I2C LCD
 //  driver module. Initially ported from STM32F103-CMSIS-I2C-LCD-lib.c
+//
+//  Note that even though all 8 data lines are connected to the LCD, the routines work in
+//  4-bit mode as they were ported from the non-I2C 4-bit driver.
 //  ------------------------------------------------------------------------------------------
 //  https://github.com/EZdenki/STM32F030-CMSIS-I2C-LCD-lib
 //  Released under the MIT License
@@ -218,9 +221,7 @@ I2C_LCD_puts( char *data )
 //  of the original decimal number rounded to 1 decimal place. For example, if the number
 //  in question is 12.36, then 1236 is passed via realV. The resulting string is 12.4,
 //  because 12.36 rounds up to 12.4. Negative numbers and more complex rounding work as
-//  expected. For example, -2.35, passed as -235, returns "-2.4", and 19.96, passed as 1996,
-//  "w" = -2 and "d" = 4. Also, 19.96 would return "w" = 20 and "d" = 0. Note that "w" and "d"
-//  are passed by reference.
+//  expected. For example, -2.35, passed as -235, returns "-2.4".
 void
 i100toa( int16_t realV, char *thisString )
 {
